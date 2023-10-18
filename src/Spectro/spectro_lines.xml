@@ -1,0 +1,24 @@
+<Spectrum>
+    <lines>
+	<line>
+	    <wl>1034</wl>
+	    <width>40</width>
+	    <depth>0.5</depth>
+	</line>
+	<line>
+	    <wl>1400</wl>
+	    <width>70</width>
+	    <depth>0.2</depth>
+	</line>
+	<line>
+	    <wl>900</wl>
+	    <width>50</width>
+	    <depth>0.9</depth>
+	</line>
+	<line>
+	    <wl>1700</wl>
+	    <width>60</width>
+	    <depth>0.8</depth>
+	</line>
+    </lines>
+</Spectrum>
