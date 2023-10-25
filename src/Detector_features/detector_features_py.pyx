@@ -496,5 +496,29 @@ def background_generation(psf, double background_signal, double qe, double expos
 
     return np.array(res)
 
+def gen_shotnoise(image):
+    """
+    Function that creates a simulated background image based on a random poisson distributed image that is convolved with the given Pointspread function.
+
+    Parameters
+    ----------
+    image: array, python array containing the incomming flux
+    
+    Returns
+    -------
+    array, float array depicting the shot noise model of the image
+    """
+    cdef unsigned int dim_x = image.shape[0]
+    cdef unsigned int dim_y = image.shape[1]
+    cdef np.ndarray[double , ndim=1, mode="c"] image_cython = np.asarray(image.ravel(), dtype = np.double, order="C")
+    cdef double *shot
+    
+    res = ArrayWrapper()
+    shot = df.generate_shot(&image_cython[0], dim_x, dim_y)
+    res.set_data(dim_x, dim_y, <void*>shot)
+
+    return np.array(res)
+
+
 if __name__ == "__main__":
   doctest.testmod()

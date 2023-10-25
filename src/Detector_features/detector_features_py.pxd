@@ -34,3 +34,5 @@ cdef extern from 'detector_features.h':
 
   double *convolve_starmask_fast(double *starmask, double *psf, int width_star, int height_star, int width_psf, int height_psf)
 
+  double *generate_shot(double *signal, unsigned int width, unisgned int height)
+
