@@ -49,6 +49,6 @@ double *smear_star_image(double*, unsigned int, unsigned int, double, double, un
 
 double *convolve_starmask_fast(double *, double *, int, int, int, int);
 
-void generate_space_ball(double *, unsigned int, unsigned int, double, double, double, double, double);
+double *generate_shot(double *, unsigned int, unsigned int);
 
 #endif //DATASIM_UTILITY_LIB_H

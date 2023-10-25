@@ -666,19 +666,22 @@ double *smear_star_image(double *starmask, unsigned int width, unsigned int heig
  * @brief Function for generating a poisson-distributed shot noise model based on the provided image
  *
  * @param signal: combined stellar and bkgr flux of the image
- * @param[out] shot_noise: buffer for the output array
  * @param width: width of the image buffers
  * @param height: height of the image buffers
  *
+ * @returns array containing a poisson based shot noise model
  */
 
 
-void generate_shot(double *signal, double *shot_noise, unsigned int width, unsigned int height)
+double *generate_shot(double *signal, unsigned int width, unsigned int height)
 {
     unsigned int i;
     double mean;
+	double *shot_noise;
 
     mean = 0;
+
+	shot_noise = (double*) malloc(width*height*sizeof(double));
 
     for(i = 0; i < width*height; i++)
     {
@@ -693,4 +696,5 @@ void generate_shot(double *signal, double *shot_noise, unsigned int width, unsig
         shot_noise[i] = shot_noise[i] - mean;
     }
 
+	return shot_noise;
 }
