@@ -661,28 +661,36 @@ double *smear_star_image(double *starmask, unsigned int width, unsigned int heig
 	return smeared_image;
 }
 
+
 /**
- * @brief Function that generates a lorentzian bell curve inside of an image in order to simulate space balls
+ * @brief Function for generating a poisson-distributed shot noise model based on the provided image
  *
- * @param[out] image, pointer toinput image inside which the sapce ball will be generated
- * @param width/height, dimensions of the input image
- * @param x0/y0, position of the space ball inside of the image
- * @param gamma_x/gamma_y, widht of the space ball in x and y direction
- * @param amp, amplitude of the space ball, note that this should be high enough to saturate the image.
- * 
+ * @param signal: combined stellar and bkgr flux of the image
+ * @param[out] shot_noise: buffer for the output array
+ * @param width: width of the image buffers
+ * @param height: height of the image buffers
+ *
  */
 
 
-void generate_space_ball(double *image, unsigned int width, unsigned int height, double x0, double y0, double gamma_x, double gamma_y, double amp)
+void generate_shot(double *signal, double *shot_noise, unsigned int width, unsigned int height)
 {
-	unsigned int i, j;
+    unsigned int i;
+    double mean;
 
-	for(i = 0; i < width; i++)
-	{
-		for(j = 0; j < height; j++)
-		{
-			image[i + height * j] += amp/(1 + pow((i-x0)/gamma_x,2) + pow((j-y0)/gamma_y,2));
-		}
-	}
+    mean = 0;
+
+    for(i = 0; i < width*height; i++)
+    {
+        shot_noise[i] = random_poisson(sqrt(signal[i]));
+        mean = mean + shot_noise[i];
+    }
+
+    mean = mean / (width * height);
+
+    for(i = 0; i < width*height; i++)
+    {
+        shot_noise[i] = shot_noise[i] - mean;
+    }
 
 }
