@@ -1,4 +1,4 @@
-all:	datasim_utility detector_features dpu_algorithms
+all:	datasim_utility detector_features
 	@echo "finished building all targets"
 
 datasim_utility:

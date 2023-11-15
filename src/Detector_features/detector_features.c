@@ -139,7 +139,7 @@ double *generate_masterbias(double *biasframe, double bias_value, double readout
  * @returns matrix containing the darkframe
  */
 
-double *generate_dark(double dark_mean, double exp_time, double *hot_pixels, unsigned int width, unsigned int height, unsigned int os, double sb_rate, double sb_amp, double sb_size_mean, double sb_size_sig)
+double *generate_dark(double dark_mean, double exp_time, double *hot_pixels, unsigned int width, unsigned int height, unsigned int os)
 {
   double *darkframe, *darkframe_os;
   unsigned int i;
@@ -156,10 +156,6 @@ double *generate_dark(double dark_mean, double exp_time, double *hot_pixels, uns
 
   if(os != 1){
     darkframe_os = upsample_image(darkframe, width, height, os, 0);
-    if(rand()/RAND_MAX < sb_rate)
-    {
-      generate_space_ball(darkframe_os, width*os, height*os, (rand()/(double)RAND_MAX) * width * os, (rand()/(double) RAND_MAX) * height * os, random_normal_number(sb_size_mean*os, sb_size_sig*os), random_normal_number(sb_size_mean*os, sb_size_sig*os), sb_amp);
-    }
     for(i = 0; i < width*os*height*os; i++){
       darkframe_os[i] = darkframe_os[i] * hot_pixels[i];
       free(darkframe);
@@ -167,8 +163,6 @@ double *generate_dark(double dark_mean, double exp_time, double *hot_pixels, uns
     }
   }
   else{
-    generate_space_ball(darkframe, width, height, rand()/(double)RAND_MAX * width, rand()/(double)RAND_MAX * height, random_normal_number(sb_size_mean, sb_size_sig), random_normal_number(sb_size_mean, sb_size_sig), sb_amp);
-
     for(i = 0; i < width*height; i++){
       darkframe[i] = darkframe[i] * hot_pixels[i];
     }
@@ -197,7 +191,7 @@ double *generate_masterdark(double *darkframe, double dark_mean, double exp_time
   memcpy(master_dark, darkframe, width*height*sizeof(double));
 
   for(i = 0; i < (readouts-1); i++){
-    tmp_dark = generate_dark(dark_mean, exp_time, hot_pixels, width, height, 1, 0, 0, 0, 0);
+    tmp_dark = generate_dark(dark_mean, exp_time, hot_pixels, width, height, 1);
     for(j = 0; j < width*height; j++){
       master_dark[j] = master_dark[j] + tmp_dark[j];
     }
@@ -675,26 +669,15 @@ double *smear_star_image(double *starmask, unsigned int width, unsigned int heig
 
 double *generate_shot(double *signal, unsigned int width, unsigned int height)
 {
-    unsigned int i;
-    double mean;
-	double *shot_noise;
-
-    mean = 0;
+  unsigned int i;
+  double *shot_noise, *matrix;
 
 	shot_noise = (double*) malloc(width*height*sizeof(double));
 
-    for(i = 0; i < width*height; i++)
-    {
-        shot_noise[i] = random_poisson(sqrt(signal[i]));
-        mean = mean + shot_noise[i];
-    }
-
-    mean = mean / (width * height);
-
-    for(i = 0; i < width*height; i++)
-    {
-        shot_noise[i] = shot_noise[i] - mean;
-    }
-
-	return shot_noise;
+  for(i = 0; i < width*height; i++)
+  {
+    matrix = random_poisson_trm(signal[i], 1);
+    shot_noise[i] = *matrix;
+  }
+  return shot_noise;
 }

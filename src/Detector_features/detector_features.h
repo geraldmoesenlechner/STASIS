@@ -25,7 +25,7 @@ double *generate_bias(double, double, unsigned int, unsigned int, unsigned int);
 
 double *generate_masterbias(double*, double, double, unsigned int, unsigned int, unsigned int);
 
-double *generate_dark(double, double, double*, unsigned int, unsigned int, unsigned int, double, double, double, double);
+double *generate_dark(double, double, double*, unsigned int, unsigned int, unsigned int);
 
 double *generate_masterdark(double* ,double, double, double*, unsigned int, unsigned int, unsigned int);
 
