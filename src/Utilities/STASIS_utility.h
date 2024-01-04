@@ -8,8 +8,8 @@
 #include <fftw3.h>
 #include <stdbool.h>
 
-#ifndef DATASIM_UTILITY_LIB_H
-#define DATASIM_UTILITY_LIB_H
+#ifndef STASIS_UTILITY_LIB_H
+#define STASIS_UTILITY_LIB_H
 
 double *random_poisson_trm(double, unsigned int);
 
@@ -29,4 +29,4 @@ double *tile_array(double *, unsigned int, unsigned int, unsigned int, unsigned 
 
 double *rotate_image(double *, double, unsigned int, unsigned int, int);
 
-#endif //DATASIM_UTILITY_LIB_H
+#endif //STASIS_UTILITY_LIB_H

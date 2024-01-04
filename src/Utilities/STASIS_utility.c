@@ -1,5 +1,5 @@
 /**
-* @file    datasim_utility_lib.c
+* @file    STASIS_utility_lib.c
 * @author  Gerald Mösenlechner (gerald.moesenlechner@univie.ac.at)
 * @date    October, 2019
 *
@@ -35,7 +35,7 @@
 #include <libxml/xmlversion.h>
 #include <libxml/tree.h>
 */
-#include "./datasim_utility.h"
+#include "./STASIS_utility.h"
 
 #define SET_PIXEL(img,cols,x,y,val) ( img[x + cols * y] = val )
 #define GET_PIXEL(img,cols,x,y) ( img[x + cols * y] )
