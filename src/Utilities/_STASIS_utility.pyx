@@ -29,7 +29,7 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 sys.path.append('../')
 from lxml import etree as xmlTree
 cimport numpy as np
-cimport _STASIS_utility_py as utils
+cimport _STASIS_utility as utils
 from cpython.pycapsule cimport *
 from libc.stdlib cimport malloc, free
 from libc.stdlib cimport bool as bool_c

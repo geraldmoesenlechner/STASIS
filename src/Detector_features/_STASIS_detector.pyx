@@ -35,7 +35,7 @@ from cpython.pycapsule cimport *
 from libc.stdlib cimport malloc, free
 from libc.stdlib cimport bool as bool_c
 np.import_array()
-
+from lxml import etree as xmlTree
 
 cdef class ArrayWrapper:
     """ Internal class used for proper memory handling of arrays allocated in C
@@ -311,12 +311,12 @@ cdef class Stars:
 
         if os.path.isfile(stars_config):
             try:
-
+                
                 tree = xmlTree.parse(stars_config)
                 root = tree.getroot()
 
                 #get stars on detector
-                starsTree = root.findall(const.xml_star)
+                starsTree = root.findall("star")
                 stars_number = len(starsTree)
                 x = []
                 y = []
@@ -326,10 +326,10 @@ cdef class Stars:
                 i = 0
                 for xmlStar in starsTree:
 
-                    x.append(float(xmlStar.get(const.star_pos_x)))
-                    y.append(float(xmlStar.get(const.star_pos_y)))
-                    signal.append(float(xmlStar.get(const.star_signal)))
-                    is_target.append(int(xmlStar.get(const.star_is_target)))
+                    x.append(float(xmlStar.get("pos_x")))
+                    y.append(float(xmlStar.get("pos_y")))
+                    signal.append(float(xmlStar.get("signal")))
+                    is_target.append(int(xmlStar.get("is_target")))
 
 
                 self.cstars.number = np.uintc(len(x))
@@ -449,19 +449,7 @@ cdef class Stars:
         for i in range(self.cstars.number):
             if self.cstars.is_target[i] == 1:
                 return self.cstars.x[i], self.cstars.y[i], self.cstars.signal[i]
-
-    def generate_xmlContent_stars(self):
-        starfieldRoot = xmlTree.Element(const.xml_star_field)
-        for i in range(self.cstars.number):
-            attributes = []
-
-            attributes.append((const.pos_x, "{:10.3f}".format(self.cstars.x[i])))
-            attributes.append((const.pos_y, "{:10.3f}".format(self.cstars.y[i])))
-            attributes.append((const.star_signal, str(self.cstars.signal[i])))
-            attributes.append((const.star_is_target, str(self.cstars.is_target[i])))
-            io.generate_subelement(starfieldRoot, const.xml_star, None, attributes)
-
-        return starfieldRoot
+ 
 
 
 def background_generation(psf, double background_signal, double qe, double exposure_time, unsigned int detector_dim_x, unsigned int detector_dim_y, unsigned int oversampling = 1):

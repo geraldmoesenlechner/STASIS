@@ -6,7 +6,7 @@ INCLUDE_DIR = /usr/include/
 
 
 SOURCES = $(SRC_DIR)/sc_kinematics.c
-TARGET = libsc_lkinematics.so
+TARGET = libsc_kinematics.so
 
 
 $(TARGET): $(SOURCES)
@@ -24,4 +24,4 @@ install:
 .PHONY: uninstall
 uninstall:
 	sudo rm $(DEST_DIR)$(TARGET)
-	sudo rm $(INCLUDE_DIR)/sc_lkinematics.h
+	sudo rm $(INCLUDE_DIR)/sc_kinematics.h

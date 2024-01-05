@@ -1,5 +1,5 @@
 
-cdef extern from "_STASIS_utility.h":
+cdef extern from "STASIS_utility.h":
 
     double *random_poisson_trm(double mean, unsigned int size)
 

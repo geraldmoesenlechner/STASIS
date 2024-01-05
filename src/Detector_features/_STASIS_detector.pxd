@@ -3,7 +3,7 @@ cdef extern from 'STASIS_detector.h':
       double *signal
       double *x
       double *y
-      unsigned int number;
+      unsigned int number
       short *is_target
 
   double *generate_bias(double bias_value, double readout_noise, unsigned int width, unsigned int height, unsigned int os)
@@ -34,5 +34,5 @@ cdef extern from 'STASIS_detector.h':
 
   double *convolve_starmask_fast(double *starmask, double *psf, int width_star, int height_star, int width_psf, int height_psf)
 
-  double *generate_shot(double *signal, unsigned int width, unisgned int height)
+  double *generate_shot(double *signal, unsigned int width, unsigned int height)
 
