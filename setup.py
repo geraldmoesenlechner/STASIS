@@ -1,5 +1,5 @@
 from os import path
-from setuptools import Extension, setup
+from setuptools import Extension, setup, find_packages
 from Cython.Build import cythonize
 import numpy as np
 import subprocess as  sp
@@ -26,4 +26,5 @@ extensions = [
 setup(
     name="STASIS",
     ext_modules=cythonize(extensions),
+    packages=find_packages(),
 )
