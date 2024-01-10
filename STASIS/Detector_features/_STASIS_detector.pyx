@@ -42,10 +42,12 @@ cdef class ArrayWrapper:
     and passed to Python. Mallocs a memory buffer of size (n*sizeof(int)) and
     sets up the numpy array.
 
-    Attributes
-    ----------
-    size_x, size_y: int, Length of the array.
-    data_ptr: void*, Pointer of the C-array
+    :param size_x: Length of the array in x.
+    :type size_x: int
+    :param size_y: Length of the array in y.
+    :type size_y: int
+    :param data_ptr: Pointer of the C-array.
+    :type data_ptr: void*
     """
     cdef void* data_ptr
     cdef int size_x
@@ -72,16 +74,18 @@ def gen_bias(double bias_value, double readout_noise, unsigned int dim_x, unsign
     """
     Function that creates a simulated bias frame.
 
-    Parameters
-    ----------
-    bias_value: double, Constant offset of the image
-    readout_noise: double, mean readout noise of the detector [ADU/s]
-    dim_x, dim_y: int, x-dim and y-dim in px
-    oversampling: int, oversampling of the image based on the overall sub-px flat
-
-    Returns
-    -------
-    array, array containing the simulated bias
+    :param bias_value: Constant offset of the image
+    :type bias_value: double
+    :param readout_noise: mean readout noise of the detector [ADU/s]
+    :type readout_noise: double
+    :param dim_x: x dimension of the array
+    :type dim_x: unsigned int
+    :param dim_y: y dimension of the array
+    :type dim_y: unsigned int
+    :param oversampling: oversampling of the image based on the overall sub-px flat, defaults to 1
+    :type oversampling: unsigned int
+    :return: array containing the simulated bias
+    :rtype: array
     """
 
     cdef double *bias
@@ -95,16 +99,16 @@ def gen_masterbias(biasframe, double bias_value, double readout_noise, unsigned 
     """
     Function that creates a simulated masterbias.
 
-    Parameters
-    ----------
-    biasframe: array, reference frame for the master-bias generation
-    bias_value: double, Constant offset of the image
-    readout_noise: double, mean readout noise of the detector [ADU/s]
-    readouts: int, number of frames simulated for the masterbias generation
-
-    Returns
-    -------
-    array, array containing the masterbias
+    :param biasframe: reference frame for the master-bias generation
+    :type biasframe: array
+    :param bias_value: Constant offset of the image
+    :type bias_value: double
+    :param readout_noise: mean readout noise of the detector [ADU/s]
+    :type readout_noise: double
+    :param readouts: number of frames simulated for the masterbias generation
+    :type readouts: unsigned int
+    :return: array containing the masterbias
+    :rtype: array
     """
 
     cdef double *masterbias
@@ -119,20 +123,22 @@ def gen_masterbias(biasframe, double bias_value, double readout_noise, unsigned 
     return np.array(res)
 
 def gen_dark(double dark_mean, double exp_time, hot_pixels, unsigned int dim_x, unsigned int dim_y, unsigned int oversampling = 1):
-    """
-    Function that creates a simulated dark frame.
+    """Function that creates a simulated dark frame.
 
-    Parameters
-    ----------
-    dark_mean: double, mean value of the dark in [ADU/s]
-    exp_time: double, exposure time in [s]
-    hot_pixels: array, array containing a map of the hot pixels
-    dim_x, dim_y: unsigned int, x-dim and y-dim in px
-    oversampling: unsigned int, oversampling of sub-px flat
-
-    Returns
-    -------
-    array, array containing the simulated darkframe
+    :param dark_mean: mean value of the dark in [ADU/s]
+    :type dark_mean: double
+    :param exp_time: exposure time in [s]
+    :type exp_time: double
+    :param hot_pixels: array containing a map of the hot pixels
+    :type hot_pixels: array
+    :param dim_x: x-dim of the array
+    :type dim_x: unsigned int
+    :param dim_y: y-dim of the array
+    :type dim_y: unsigned int
+    :param oversampling: oversampling of the image based on the overall sub-px flat, defaults to 1
+    :type oversampling: unsigned int
+    :return: array containing the dark frame
+    :rtype: array
     """
 
     cdef double *dark
@@ -150,20 +156,20 @@ def gen_dark(double dark_mean, double exp_time, hot_pixels, unsigned int dim_x, 
     return np.array(res)
 
 def gen_masterdark(darkframe, double dark_mean, double exp_time, hot_pixels, unsigned int readouts):
-    """
-    Function that creates a simulated masterdark
+    """Function that creates a simulated masterdark
 
-    Parameters
-    ----------
-    darkframe: array, reference frame for the masterdark generation
-    dark_mean: double, mean value of the dark in [ADU/s]
-    exp_time: double, exposure time in [s]
-    hot_pixels: array, array containing a map of the hot pixels
-    readouts: int, number of frames simulated for the masterbias generation
-
-    Returns
-    -------
-    array, array containing the simulated masterdark
+    :param darkframe: reference frame for the masterdark generation
+    :type darkframe: array
+    :param dark_mean: mean value of the dark in [ADU/s]
+    :type dark_mean: double
+    :param exp_time: exposure time in [s]
+    :type exp_time: double
+    :param hot_pixels: array containing a map of the hot pixels
+    :type hot_pixels: array
+    :param readouts: number of frames simulated for the masterbias generation
+    :type readouts: unsigned int
+    :return: array containing the masterdark
+    :rtype: array
     """
 
     cdef double *masterdark
@@ -185,20 +191,22 @@ def gen_masterdark(darkframe, double dark_mean, double exp_time, hot_pixels, uns
     return np.array(res)
 
 def gen_hotpixels(double percentage, double lower_limit, double upper_limit, unsigned int dim_x, unsigned int dim_y, oversampling = 1):
-    """
-    Function that creates a map containing a given number of randomly distributed hot pixels inside of the image.
+    """Function that creates a map containing a given number of randomly distributed hot pixels inside of the image.
 
-    Parameters
-    ----------
-    percentage: double, max percentage of pixels in the image that should be hp [0-1]
-    lower_limit: double, lowest possible signal value for hp
-    upper_limit: double, highest possible signal value for hp
-    dim_x, dim_y: int, x-dim and y-dim in px
-    oversampling: int, oversampling of the Psf
-
-    Returns
-    -------
-    array, array depicting the hot pixels in the image
+    :param percentage: max percentage of pixels in the image that should be hp [0-1]
+    :type percentage: double
+    :param lower_limit: lowest possible signal value for hp
+    :type lower_limit: double
+    :param upper_limit: highest possible signal value for hp
+    :type upper_limit: double
+    :param dim_x: x-dim of the array
+    :type dim_x: unsigned int
+    :param dim_y: y-dim of the array
+    :type dim_y: unsigned int
+    :param oversampling: oversampling of the image based on the overall sub-px flat, defaults to 1
+    :type oversampling: unsigned int
+    :return: array containing the hot pixel image
+    :rtype: array
     """
 
     cdef double *hp
@@ -210,25 +218,30 @@ def gen_hotpixels(double percentage, double lower_limit, double upper_limit, uns
     return np.array(res)
 
 def gen_flat(double flat_mean, double flat_sigma, subpxflat, double grad_lower, double grad_upper, double grad_var, double angle, double px_to_px_response, unsigned int dim_x, unsigned int dim_y):
-    """
-    Function that creates a simulated flatfield.
+    """Function that creates a simulated flatfield.
 
-    Parameters
-    ----------
-    flat_mean: double, mean values of the normally distributed pixel sensitivity [0-1]
-    flat_sigma: double, variation of the pixel sensitivity
-    subpxflat: array, array containing the inter-pixel sensitivity
-    grad_lower: double, lower limit for a flat gradient [TBD]
-    grad_upper: double, upper limit for a flat gradient [TBD]
-    grad_var: double, variation of the flat gradient [TBD]
-    angle: double, direction of the gradient [TBD]
-    px_to_px_response: double, [TBD]
-    os: int, oversampling of the Psf
-    dim_x, dim_y: int, x-dim and y-dim in px
-
-    Returns
-    -------
-    array, array depicting the flat
+    :param flat_mean: mean values of the normally distributed pixel sensitivity [0-1]
+    :type flat_mean: double
+    :param flat_sigma: variation of the pixel sensitivity
+    :type flat_sigma: double
+    :param subpxflat: array containing the inter-pixel sensitivity
+    :type subpxflat: array
+    :param grad_lower: lower limit for a flat gradient [TBD]
+    :type grad_lower: double
+    :param grad_upper: upper limit for a flat gradient [TBD]
+    :type grad_upper: double
+    :param grad_var: variation of the flat gradient [TBD]
+    :type grad_var: double
+    :param angle: direction of the gradient [TBD]
+    :type angle: double
+    :param px_to_px_response: [TBD]
+    :type px_to_px_response: double
+    :param dim_x: x-dim of the array
+    :type dim_x: unsigned int
+    :param dim_y: y-dim of the array
+    :type dim_y: unsigned int
+    :return: array containing the flat field
+    :rtype: array
     """
 
     cdef double *flat
@@ -257,18 +270,18 @@ def gen_flat(double flat_mean, double flat_sigma, subpxflat, double grad_lower, 
     return res
 
 def smear_stars(starmask, double x, double y, unsigned int oversampling = 1):
-    """
-    Function that creates a linear smearing kernel that is convolved with the given starmask. Used to emulate jitter during the image inegration.
+    """Function that creates a linear smearing kernel that is convolved with the given starmask. Used to emulate jitter during the image inegration.
 
-    Parameters
-    ----------
-    starmask: array, python array containing the original starmask
-    x, y: double, x and y length of the smear
-    oversampling:int, oversampling of the Psf
-
-    Returns
-    -------
-    array, float array depicting the smeared starmask
+    :param starmask: python array containing the original starmask
+    :type starmask: array
+    :param x: the x-lenght of the smear
+    :type x: double
+    :param y: the y-lenght of the smear
+    :type y: double
+    :param oversampling: oversampling of the image based on the overall sub-px flat, defaults to 1
+    :type oversampling: unsigned int
+    :return: array containing the smeared starmask
+    :rtype: array
     """
 
     cdef unsigned int width = starmask.shape[0]
@@ -288,26 +301,15 @@ cdef class Stars:
     """ Class that handles the data of the stars used for the simulation and
     provides star-image generation and updating of the star-data
 
-    Attributes
-    ----------
-    cstars: struct stars, C-Struct containing the star-data. Is automatically
-    generated from the inputfile
-
-    Methods
-    -------
-    gen_star_image(psf, double qe, double exposure_time, unsigned int dim_x, unsigned int dim_y, unsigned int oversampling)
-        returns a image of the stars stored in the class with the defined size and given Pointspread function
-    rotate_star_position(double alpha, double x_origin, double y_origin)
-        rotates the coordinates of the stored stars around a given point by alpha (deg)
-    shift_stars(double x_step, double y_step, only_target=False)
-        shifts the star coordinates by a given amount [px] in the linear x and y direction
-    update_star_signal(double signal_step, only_target=False)
-        increases the signal of the stars by a given step
+    :param stars_config: xml file containing the star catalouge
+    :type stars_config: string
     """
 
     cdef df.stars cstars
 
     def __init__(self, stars_config):
+        """Constructor method
+        """
 
         if os.path.isfile(stars_config):
             try:
@@ -320,6 +322,8 @@ cdef class Stars:
                 stars_number = len(starsTree)
                 x = []
                 y = []
+                ra = []
+                dec = []
                 signal = []
                 is_target = []
                 number = []
@@ -328,6 +332,8 @@ cdef class Stars:
 
                     x.append(float(xmlStar.get("pos_x")))
                     y.append(float(xmlStar.get("pos_y")))
+                    ra.append(float(xmlStar.get("ra")))
+                    dec.append(float(xmlStar.get("dec")))
                     signal.append(float(xmlStar.get("signal")))
                     is_target.append(int(xmlStar.get("is_target")))
 
@@ -336,12 +342,16 @@ cdef class Stars:
 
                 self.cstars.x = <double *> malloc(self.cstars.number * sizeof(double))
                 self.cstars.y = <double *> malloc(self.cstars.number * sizeof(double))
+                self.cstars.ra = <double *> malloc(self.cstars.number * sizeof(double))
+                self.cstars.dec = <double *> malloc(self.cstars.number * sizeof(double))
                 self.cstars.signal = <double *> malloc(self.cstars.number * sizeof(double))
                 self.cstars.is_target = <short *> malloc(self.cstars.number * sizeof(short))
 
                 for i in range(self.cstars.number):
                     self.cstars.x[i] = np.double(x[i])
                     self.cstars.y[i] = np.double(y[i])
+                    self.cstars.ra[i] = np.double(ra[i])
+                    self.cstars.dec[i] = np.double(dec[i])
                     self.cstars.signal[i] = np.double(signal[i])
                     self.cstars.is_target[i] = np.short(is_target[i])
 
@@ -352,13 +362,42 @@ cdef class Stars:
             raise Exception("ERROR: No " + stars_config + " could be found.")
 
     def __dealloc__(self):
+        """Deallocator
+        """
         free(self.cstars.x)
         free(self.cstars.y)
+        free(self.cstars.ra)
+        free(self.cstars.dec)
         free(self.cstars.signal)
         free(self.cstars.is_target)
 
 
     def gen_star_image(self, psf, double qe, double exposure_time, unsigned int dim_x, unsigned int dim_y, unsigned int oversampling, add_jitter, jitter_files, double smear_x = 0, double smear_y = 0):
+        """Method for generating a star image based on the configured stars
+
+        :param psf: point spread funciton to be used in the image generation
+        :type psf: array
+        :param qe:  quantum efficiency of the simulated detector
+        :type qe: double
+        :param exposure_time: exposure time of the simulated image
+        :type exposure_time: double
+        :param dim_x: x size of the image
+        :type  dim_x: unsigned int
+        :param dim_y: y size of the image
+        :type  dim_y: unsigned int
+        :param oversampling: the oversampling factor of the provided psf
+        :type oversampling: unisgned int
+        :param add_jitter: flag to enable jitter simulation
+        :type add_jitter: bool
+        :param jitter_files: directory of the jitter files to be used
+        :type jitter_files: string
+        :param smear_x: size of the smearing in x direction [px], defaults to 0
+        :type smear_x: double
+        :param smear_y: size of the smearing in y direction [px], defaults to 0
+        :type smear_y: double
+        :return: image depicting the current FoV of the telescope
+        :rtype: array
+        """
         cdef unsigned int psf_dim_x = psf.shape[0]
         cdef unsigned int psf_dim_y = psf.shape[1]
         cdef np.ndarray[double , ndim=1, mode="c"] psf_cython = np.asarray(psf.ravel(), dtype = np.double, order="C")
@@ -405,6 +444,15 @@ cdef class Stars:
         return np.array(res)
 
     def rotate_star_position(self, double alpha, double x_origin, double y_origin):
+        """Rotate the star coordinates around a given origin
+
+        :param alpha: angle of the rotation [deg]
+        :type alpha: double
+        :param x_origin: x_origin of the rotation
+        :type x_origin: double
+        :param y_origin: y_origin of the rotation
+        :type y_origin: double
+        """
         cdef double alpha_rad
 
         alpha_rad = np.radians(alpha)
@@ -414,6 +462,15 @@ cdef class Stars:
         return
 
     def shift_stars(self, double x_step, double y_step, only_target=False):
+        """Shift stars in a linear fashion
+
+        :param x_step: shift in x [px]
+        :type x_step: double
+        :param y_step: shift in y [px]
+        :type y_step: double
+        :param only_target: flag to only shift target stars, defaults to False
+        :type only_target: bool
+        """
         if only_target:
             for i in range(self.cstars.number):
                 if self.cstars.is_target[i] == 1:
@@ -427,6 +484,13 @@ cdef class Stars:
         return
 
     def set_target_pos(self, x, y):
+        """Set the position of all targets to a specific coordinate
+
+        :param x: x coordinate
+        :type x: double
+        :param y: y coordinate
+        :type y: double
+        """
         for i in range(self.cstars.number):
             if self.cstars.is_target[i] == 1:
                 self.cstars.x[i] = x
@@ -435,6 +499,13 @@ cdef class Stars:
 
 
     def update_star_signal(self, double signal_step, only_target=False):
+        """Increases the signal of stars by a defined value
+
+        :param signal_step: Signal value to be added
+        :type signal_step: double
+        :param only_target: flag to only increase target stars, defaults to False
+        :type only_target: bool
+        """
         if only_target:
             for i in range(self.cstars.number):
                 if self.cstars.is_target[i] == 1:
@@ -446,28 +517,67 @@ cdef class Stars:
         return
 
     def return_target_data(self):
+        """Method to return the current position for the target stars
+
+        :return: coordinates and signal of the target
+        :rtype: double, double, double
+        """
         for i in range(self.cstars.number):
             if self.cstars.is_target[i] == 1:
                 return self.cstars.x[i], self.cstars.y[i], self.cstars.signal[i]
- 
+
+    def convert_to_detector(quaternion, fov, platescale):
+        """Method to determine the x/y coordinates of stars on the detector based on an input quaternion
+
+        :param quaternion: Input quaternion, scalar first notation
+        :type quaternion: array
+        :param fov: the field of view size [deg]
+        :type fov: double
+        :param platescale: platescale of the detector
+        :type platescale: double
+        """
+        star_quat = np.zeros(4)
+        quaternion_inv = np.array([quaternion[0], -quaternion[1], -quaternion[2], -quaternion[3]])
+        for i in range(self.cstars.number):
+            stat_quat[0] = 0
+            star_quat[1] = np.cos(self.cstars.dec[i] * (np.pi/180)) * np.cos(self.cstars.ra[i] * (np.pi/180))
+            star_quat[2] = np.cos(self.cstars.dec[i] * (np.pi/180)) * np.sin(self.cstars.ra[i] * (np.pi/180))
+            star_quat[3] = np.sin(self.cstars.dec[i] * (np.pi/180))
+
+            tmp = multiply_quat(quaternion, star_quat)
+            res_quat = multiply_quat(tmp, quaternion_inv)
+
+            x_pos = res_quat[1]*(180/np.pi)
+            y_pos = res_quat[2]*(180/np.pi)
+
+            if np.abs(x_pos) < fov/2 and np.abs(y_pos) < fov/2:
+                self.cstars.x[i] = (x_pos + fov/2) * 3600000 / platescale
+                self.cstars.x[i] = (y_pos + fov/2) * 3600000 / platescale
+            else:
+                self.cstars.x[i] = -10
+                self.cstars.y[i] = -10
+
 
 
 def background_generation(psf, double background_signal, double qe, double exposure_time, unsigned int detector_dim_x, unsigned int detector_dim_y, unsigned int oversampling = 1):
-    """
-    Function that creates a simulated background image based on a random poisson distributed image that is convolved with the given Pointspread function.
+    """Function that creates a simulated background image based on a random poisson distributed image that is convolved with the given Pointspread function.
 
-    Parameters
-    ----------
-    psf: array, python array containing the Pointspread function
-    background_signal: double, mean signal of the background [photons/s]
-    qe: double, quantu, efficiency of the detector
-    exposure_time: double, exposure time of the image in seconds
-    detector_dim_x, detector_dim_y: int, x-dim and y-dim in px
-    oversampling:int, oversampling of the Psf
-
-    Returns
-    -------
-    array, float array depicting the oversampled background image
+    :param psf: python array containing the Pointspread function
+    :type psf: array
+    :param background_signal: mean signal of the background [photons/s]
+    :type backlground_signal: double
+    :param qe: quantum efficiency of the detector
+    :type qe: double
+    :param exposure_time: exposure time of the image in seconds
+    :type exposure_time: double
+    :param detector_dim_x: x-dim of the array
+    :type detector_dim_x: unsigned int
+    :param detector_dim_y: y-dim of the array
+    :type detector:dim_y: unsigned int
+    :param oversampling: oversampling of the image based on the overall sub-px flat, defaults to 1
+    :type oversampling: unsigned int
+    :return: array containing the background image
+    :rtype: array
     """
 
     cdef unsigned int psf_dim_x = psf.shape[0]
@@ -482,16 +592,12 @@ def background_generation(psf, double background_signal, double qe, double expos
     return np.array(res)
 
 def gen_shotnoise(image):
-    """
-    Function that creates a simulated background image based on a random poisson distributed image that is convolved with the given Pointspread function.
+    """Function that creates a simulated background image based on a random poisson distributed image that is convolved with the given Pointspread function.
 
-    Parameters
-    ----------
-    image: array, python array containing the incomming flux
-    
-    Returns
-    -------
-    array, float array depicting the shot noise model of the image
+    :param image: python array containing the incomming flux
+    :type image: array
+    :return: array containing the shot noise of the input image
+    :rtype: array
     """
     cdef unsigned int dim_x = image.shape[0]
     cdef unsigned int dim_y = image.shape[1]
@@ -503,6 +609,21 @@ def gen_shotnoise(image):
     res.set_data(dim_x, dim_y, <void*>shot)
 
     return np.array(res)
+
+def multiply_quat(quat1, quat2):
+    output_quat = np.zeros(4)
+    vec1 = quat1[1:]
+    vec2 = quat2[1:]
+    s1 = quat1[0]
+    s2 = quat2[0]
+
+    cross_res = np.cross(vec1, vec2)
+    output_quat[0] = s1 * s2 - np.dot(vec1, vec2)
+    output_quat[1] = s1 * vec2[0] + s2 * vec1[0] + cross_res[0]
+    output_quat[2] = s1 * vec2[1] + s2 * vec1[1] + cross_res[1]
+    output_quat[3] = s1 * vec2[2] + s2 * vec1[2] + cross_res[2]
+
+    return output_quat
 
 
 if __name__ == "__main__":

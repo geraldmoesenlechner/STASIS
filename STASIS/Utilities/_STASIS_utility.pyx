@@ -41,10 +41,12 @@ cdef class ArrayWrapper:
     and passed to Python. Mallocs a memory buffer of size (n*sizeof(int)) and
     sets up the numpy array.
 
-    Attributes
-    ----------
-    size_x, size_y: int, Length of the array.
-    data_ptr: void*, Pointer of the C-array
+    :param size_x: Length of the array in x.
+    :type size_x: int
+    :param size_y: Length of the array in y.
+    :type size_y: int
+    :param data_ptr: Pointer of the C-array.
+    :type data_ptr: void*
     """
     cdef void* data_ptr
     cdef int size_x
@@ -69,17 +71,16 @@ cdef class ArrayWrapper:
         free(self.data_ptr)
 
 def rand_poisson_array(double mean, unsigned int dim_x, unsigned int dim_y):
-  """
-  Function that returns a poisson distributed array of a defined dimension
+  """Function that returns a poisson distributed array of a defined dimension
 
-  Parameters
-  ----------
-  mean: double, mean value of the distribution
-  dim_x, dim_y:int, x-dim and y-dim in pixels
-
-  Returns
-  -------
-  array, float array containing random values of the distribution
+  :param mean: mean value of the distribution
+  :type mean: double
+  :param dim_x: x dimension of the array
+  :type dim_x: unsigned int
+  :param dim_y: y dimension of the array
+  :type dim_y: unsigned int
+  :return: array containing the random numbers
+  :rtype: array
   """
 
   cdef double *rand_array
@@ -91,18 +92,18 @@ def rand_poisson_array(double mean, unsigned int dim_x, unsigned int dim_y):
   return np.array(res)
 
 def rand_normal_array(double mean, double sigma, unsigned int dim_x, unsigned int dim_y):
-  """
-  Function that returns a normal distributed array of a defined dimension
-
-  Parameters
-  ----------
-  mean: double, mean value of the distribution
-  sigma: double, standard deviation of the distribution
-  dim_x, dim_y:int, x-dim and y-dim in pixels
-
-  Returns
-  -------
-  array, float array containing random values of the distribution
+  """Function that returns a normal distributed array of a defined dimension
+  
+  :param mean: mean value of the distribution
+  :type mean: double
+  :param sigma: standard deviation of the distribution
+  :type sigma: double
+  :param dim_x: x dimension of the array
+  :type dim_x: unsigned int
+  :param dim_y: y dimension of the array
+  :type dim_y: unsigned int
+  :return: array containing the random numbers
+  :rtype: array
   """
 
   cdef double *rand_array
@@ -114,18 +115,16 @@ def rand_normal_array(double mean, double sigma, unsigned int dim_x, unsigned in
   return np.array(res)
 
 def upsampling(image, unsigned int factor, bint copy):
-  """
-  Function that upsamples a given image by the defined factor
+  """Function that upsamples a given image by the defined factor
 
-  Parameters
-  ----------
-  image: array, input array for upsampling
-  factor: int, upsampling factor
-  copy: bint, denotes if the intensity of original pixel shall be copied to each resulting upsampled pixels
-
-  Returns
-  -------
-  array, upsampled image
+  :param image: input array for upsampling
+  :type image: array
+  :param factor: upsampling factor
+  :type factor: unsigned int
+  :param copy: denotes if the intensity of original pixel shall be copied to each resulting upsampled pixels
+  :type copy: bint
+  :return: array containing the upsampled image
+  :rtype: array
   """
 
   cdef unsigned int dim_x = image.shape[0]
@@ -140,17 +139,14 @@ def upsampling(image, unsigned int factor, bint copy):
   return np.array(res)
 
 def downsampling(image , unsigned int factor):
-  """
-  Function that downsamples a given image by the defined factor
+  """Function that downsamples a given image by the defined factor
 
-  Parameters
-  ----------
-  image: array, input array for downsampling
-  factor: int, downsampling factor
-
-  Returns
-  -------
-  array, downsampled image
+  :param image: input array for upsampling
+  :type image: array
+  :param factor: downsampling factor
+  :type factor: unsigned int
+  :return: array containing the downsampled image
+  :rtype: array
   """
   cdef unsigned int dim_x = image.shape[0]
   cdef unsigned int dim_y = image.shape[1]
@@ -165,17 +161,14 @@ def downsampling(image , unsigned int factor):
 
 
 def convolve2D(data, kernel):
-  """
-  Function that convolves two 2-dimensional arrays using FFTW
+  """Function that convolves two 2-dimensional arrays using FFTW
 
-  Parameters
-  ----------
-  data: array, array containing the original data (float)
-  kernel: array, array containing the convolution kernel (float)
-
-  Returns
-  -------
-  array, convolved image
+  :param data: array containing the original data (float)
+  :type data: array
+  :param kernel: array containing the convolution kernel (float)
+  :type kernel: array
+  :return: array containing the convolved image
+  :rtype: array
   """
   cdef unsigned int dim_x = data.shape[0]
   cdef unsigned int dim_y = data.shape[1]
@@ -193,24 +186,21 @@ def convolve2D(data, kernel):
 
 
 def create_directory_ifnotexists(path):
-  """
-  creates a directory if it does not exists already
+  """creates a directory if it does not exists already
 
-  Parameters
-  ----------
-  path: string, name of the path to be created
+  :param path: name of the path to be created
+  :type path: string
   """
   if not os.path.exists(os.path.dirname(path)):
     os.makedirs(os.path.dirname(path))
 
 def write_fits_file(filepath, images):
-  """
-  Writes a fits containing numpy arrays. If file exists the existing file is extended otherwise a new file is created.
+  """Writes a fits containing numpy arrays. If file exists the existing file is extended otherwise a new file is created.
 
-  Parameters
-  ----------
-  path: string, path + filename
-  images: list, image-data in form of a list of numpy array
+  :param path: path + filename
+  :type path: string
+  :param images: image-data in form of a list of numpy array
+  :type images: list
   """
   create_directory_ifnotexists(filepath)
   if not os.path.exists(filepath):
@@ -225,8 +215,7 @@ def write_fits_file(filepath, images):
     f.close()
 
 def get_xml_entry(tree, key, valuetype):
-  """
-  Gets the value for an xml entry as string.
+  """Gets the value for an xml entry as string.
   """
   if tree is None or tree.find(key) is None:
     if valuetype == "noneifempty":
@@ -246,11 +235,10 @@ def get_xml_entry(tree, key, valuetype):
   return value;
 
 def str2bool(sourcestr):
-  """
-  Converts a string to boolean.
-  Parameters
-  ----------
-  sourcestr: string, source string that will be converted.
+  """Converts a string to boolean.
+  
+  :param sourcestr: source string that will be converted.
+  :type sourcestr: string
   """
   result = False
   if sourcestr.lower() in ("true", "1"):
@@ -262,14 +250,15 @@ def str2bool(sourcestr):
   return result
 
 def string_param_to_array(source, newCol, newRow):
-  """
-  Converts a string parameter to an 2 dimensional float array. Mainly used to input an array as commandline param
+  """Converts a string parameter to an 2 dimensional float array. Mainly used to input an array as commandline param
   eg. source is 1/2//3/4 and newCol is '/' and newRow is '//' --> output 2x2 array
-  Parameters
-  ----------
-  source: string, contains the array data
-  newCol: char, column separator
-  newRow: char, row separator
+  
+  :param source: contains the array data
+  :type source: string
+  :param newCol: column separator
+  :type newCol: char
+  :param newRow: row separator
+  :type newRow: char
   """
   indexTillNextRow = source.find(newRow)
   if indexTillNextRow == -1: # only one row exists
@@ -310,11 +299,10 @@ def string_param_to_array(source, newCol, newRow):
   return array
 
 def floatOrEmpty(sourcestr):
-  """
-  Converts a given string to float and returns None if empty.
-  Parameters
-  ----------
-  sourcestr: string, string that will be converted.
+  """Converts a given string to float and returns None if empty.
+  
+  :param sourcestr: string that will be converted.
+  :type sourcestr: string
   """
   if sourcestr is None or sourcestr == '' or sourcestr == 'None':
     return None

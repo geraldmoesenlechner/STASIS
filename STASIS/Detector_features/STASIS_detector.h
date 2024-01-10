@@ -17,6 +17,8 @@ struct stars {
   double *signal;
   double *x;
   double *y;
+  double *ra;
+  double *dec;
   unsigned int number;
   short *is_target;
 };
