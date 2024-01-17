@@ -28,7 +28,6 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 sys.path.append('../')
-import doctest
 cimport numpy as np
 cimport _STASIS_detector as df
 from cpython.pycapsule cimport *
@@ -36,6 +35,8 @@ from libc.stdlib cimport malloc, free
 from libc.stdlib cimport bool as bool_c
 np.import_array()
 from lxml import etree as xmlTree
+
+
 
 cdef class ArrayWrapper:
     """ Internal class used for proper memory handling of arrays allocated in C
@@ -95,33 +96,6 @@ def gen_bias(double bias_value, double readout_noise, unsigned int dim_x, unsign
     res.set_data(dim_x*oversampling, dim_y*oversampling, <void*>bias)
     return np.array(res)
 
-def gen_masterbias(biasframe, double bias_value, double readout_noise, unsigned int readouts):
-    """
-    Function that creates a simulated masterbias.
-
-    :param biasframe: reference frame for the master-bias generation
-    :type biasframe: array
-    :param bias_value: Constant offset of the image
-    :type bias_value: double
-    :param readout_noise: mean readout noise of the detector [ADU/s]
-    :type readout_noise: double
-    :param readouts: number of frames simulated for the masterbias generation
-    :type readouts: unsigned int
-    :return: array containing the masterbias
-    :rtype: array
-    """
-
-    cdef double *masterbias
-    cdef unsigned int bias_dim_x = biasframe.shape[0]
-    cdef unsigned int bias_dim_y = biasframe.shape[1]
-    cdef np.ndarray[double , ndim=1, mode="c"] bias_cython = np.asarray(biasframe.ravel(), dtype = np.double, order="C")
-
-    res = ArrayWrapper()
-    masterbias = df.generate_masterbias(&bias_cython[0], bias_value, readout_noise, readouts, bias_dim_x, bias_dim_y)
-    res.set_data(bias_dim_x, bias_dim_y, <void*>masterbias)
-
-    return np.array(res)
-
 def gen_dark(double dark_mean, double exp_time, hot_pixels, unsigned int dim_x, unsigned int dim_y, unsigned int oversampling = 1):
     """Function that creates a simulated dark frame.
 
@@ -155,40 +129,6 @@ def gen_dark(double dark_mean, double exp_time, hot_pixels, unsigned int dim_x, 
 
     return np.array(res)
 
-def gen_masterdark(darkframe, double dark_mean, double exp_time, hot_pixels, unsigned int readouts):
-    """Function that creates a simulated masterdark
-
-    :param darkframe: reference frame for the masterdark generation
-    :type darkframe: array
-    :param dark_mean: mean value of the dark in [ADU/s]
-    :type dark_mean: double
-    :param exp_time: exposure time in [s]
-    :type exp_time: double
-    :param hot_pixels: array containing a map of the hot pixels
-    :type hot_pixels: array
-    :param readouts: number of frames simulated for the masterbias generation
-    :type readouts: unsigned int
-    :return: array containing the masterdark
-    :rtype: array
-    """
-
-    cdef double *masterdark
-    cdef unsigned int dark_dim_x = darkframe.shape[0]
-    cdef unsigned int dark_dim_y = darkframe.shape[1]
-    cdef unsigned int hp_dim_x = hot_pixels.shape[0]
-    cdef unsigned int hp_dim_y = hot_pixels.shape[1]
-
-    cdef np.ndarray[double , ndim=1, mode="c"] hp_cython = np.asarray(hot_pixels.ravel(), dtype = np.double, order="C")
-    cdef np.ndarray[double , ndim=1, mode="c"] darkframe_cython = np.asarray(darkframe.ravel(), dtype = np.double, order="C")
-
-    if dark_dim_x != hp_dim_x or dark_dim_y != hp_dim_y:
-        raise Exception("Hp map dimension doesn't match dark frame dimensions!")
-
-    res = ArrayWrapper()
-    masterdark = df.generate_masterdark(&darkframe_cython[0], dark_mean, exp_time, &hp_cython[0], readouts, dark_dim_x, dark_dim_y)
-    res.set_data(dark_dim_x, dark_dim_y, <void*> masterdark)
-
-    return np.array(res)
 
 def gen_hotpixels(double percentage, double lower_limit, double upper_limit, unsigned int dim_x, unsigned int dim_y, oversampling = 1):
     """Function that creates a map containing a given number of randomly distributed hot pixels inside of the image.
@@ -306,6 +246,13 @@ cdef class Stars:
     """
 
     cdef df.stars cstars
+    _x = []
+    _y = []
+    _ra = []
+    _dec = []
+    _signal = []
+    _is_target = []
+    _number = 0
 
     def __init__(self, stars_config):
         """Constructor method
@@ -320,25 +267,19 @@ cdef class Stars:
                 #get stars on detector
                 starsTree = root.findall("star")
                 stars_number = len(starsTree)
-                x = []
-                y = []
-                ra = []
-                dec = []
-                signal = []
-                is_target = []
-                number = []
+            
                 i = 0
                 for xmlStar in starsTree:
 
-                    x.append(float(xmlStar.get("pos_x")))
-                    y.append(float(xmlStar.get("pos_y")))
-                    ra.append(float(xmlStar.get("ra")))
-                    dec.append(float(xmlStar.get("dec")))
-                    signal.append(float(xmlStar.get("signal")))
-                    is_target.append(int(xmlStar.get("is_target")))
+                    self._x.append(float(xmlStar.get("pos_x")))
+                    self._y.append(float(xmlStar.get("pos_y")))
+                    self._ra.append(float(xmlStar.get("ra")))
+                    self._dec.append(float(xmlStar.get("dec")))
+                    self._signal.append(float(xmlStar.get("signal")))
+                    self._is_target.append(int(xmlStar.get("is_target")))
 
 
-                self.cstars.number = np.uintc(len(x))
+                self.cstars.number = np.uintc(len(self._x))
 
                 self.cstars.x = <double *> malloc(self.cstars.number * sizeof(double))
                 self.cstars.y = <double *> malloc(self.cstars.number * sizeof(double))
@@ -348,12 +289,12 @@ cdef class Stars:
                 self.cstars.is_target = <short *> malloc(self.cstars.number * sizeof(short))
 
                 for i in range(self.cstars.number):
-                    self.cstars.x[i] = np.double(x[i])
-                    self.cstars.y[i] = np.double(y[i])
-                    self.cstars.ra[i] = np.double(ra[i])
-                    self.cstars.dec[i] = np.double(dec[i])
-                    self.cstars.signal[i] = np.double(signal[i])
-                    self.cstars.is_target[i] = np.short(is_target[i])
+                    self.cstars.x[i] = np.double(self._x[i])
+                    self.cstars.y[i] = np.double(self._y[i])
+                    self.cstars.ra[i] = np.double(self._ra[i])
+                    self.cstars.dec[i] = np.double(self._dec[i])
+                    self.cstars.signal[i] = np.double(self._signal[i])
+                    self.cstars.is_target[i] = np.short(self._is_target[i])
 
             except:
                 print("Invalid " + stars_config + " file! Error: ", sys.exc_info()[0])
@@ -372,7 +313,7 @@ cdef class Stars:
         free(self.cstars.is_target)
 
 
-    def gen_star_image(self, psf, double qe, double exposure_time, unsigned int dim_x, unsigned int dim_y, unsigned int oversampling, add_jitter, jitter_files, double smear_x = 0, double smear_y = 0):
+    def gen_star_image(self, psf, double qe, double exposure_time, unsigned int dim_x, unsigned int dim_y, unsigned int oversampling, double smear_x = 0, double smear_y = 0):
         """Method for generating a star image based on the configured stars
 
         :param psf: point spread funciton to be used in the image generation
@@ -387,10 +328,6 @@ cdef class Stars:
         :type  dim_y: unsigned int
         :param oversampling: the oversampling factor of the provided psf
         :type oversampling: unisgned int
-        :param add_jitter: flag to enable jitter simulation
-        :type add_jitter: bool
-        :param jitter_files: directory of the jitter files to be used
-        :type jitter_files: string
         :param smear_x: size of the smearing in x direction [px], defaults to 0
         :type smear_x: double
         :param smear_y: size of the smearing in y direction [px], defaults to 0
@@ -401,45 +338,24 @@ cdef class Stars:
         cdef unsigned int psf_dim_x = psf.shape[0]
         cdef unsigned int psf_dim_y = psf.shape[1]
         cdef np.ndarray[double , ndim=1, mode="c"] psf_cython = np.asarray(psf.ravel(), dtype = np.double, order="C")
-        cdef np.ndarray[double , ndim=1, mode="c"] jitter_cython
-        cdef unsigned int jitter_dim_x
-        cdef unsigned int jitter_dim_y
         cdef double *star_mask
         cdef double *star_mask_smeared
         cdef double *star_image
-        cdef double *psf_jitter
+
 
         res = ArrayWrapper()
         star_mask = df.generate_starmask(self.cstars, qe, exposure_time, oversampling, dim_x, dim_y)
                 
-        if add_jitter:
-            kernel_name = jitter_files + "Kernel_" + str(np.random.randint(0,400)) + ".txt"
-            jitter_kernel = np.genfromtxt(kernel_name) 
-            jitter_dim_x = jitter_kernel.shape[0]
-            jitter_dim_y = jitter_kernel.shape[1]
-            jitter_cython = np.asarray(jitter_kernel.ravel(), dtype = np.double, order="C")
-
-            psf_jitter = df.convolve_starmask_fast(&psf_cython[0], &jitter_cython[0], psf_dim_x, psf_dim_y, jitter_dim_x, jitter_dim_y)
-
-            if(smear_x != 0 or smear_y != 0):
-                star_mask_smeared = df.smear_star_image(star_mask, dim_x, dim_y, smear_x, smear_y, oversampling)
-                free(star_mask)
-                star_image = df.generate_star_image(psf_jitter, star_mask_smeared, oversampling, dim_x, dim_y, psf_dim_x, psf_dim_y)
-                free(star_mask_smeared)
-                free(psf_jitter)
-            else:
-                star_image = df.generate_star_image(psf_jitter, star_mask, oversampling, dim_x, dim_y, psf_dim_x, psf_dim_y)
-                free(star_mask)
-                free(psf_jitter)
+        
+        if(smear_x != 0 or smear_y != 0):
+            star_mask_smeared = df.smear_star_image(star_mask, dim_x, dim_y, smear_x, smear_y, oversampling)
+            free(star_mask)
+            star_image = df.generate_star_image(&psf_cython[0],star_mask_smeared, oversampling, dim_x, dim_y, psf_dim_x, psf_dim_y)
+            free(star_mask_smeared)
         else:
-            if(smear_x != 0 or smear_y != 0):
-                star_mask_smeared = df.smear_star_image(star_mask, dim_x, dim_y, smear_x, smear_y, oversampling)
-                free(star_mask)
-                star_image = df.generate_star_image(&psf_cython[0],star_mask_smeared, oversampling, dim_x, dim_y, psf_dim_x, psf_dim_y)
-                free(star_mask_smeared)
-            else:
-                star_image = df.generate_star_image(&psf_cython[0],star_mask, oversampling, dim_x, dim_y, psf_dim_x, psf_dim_y)
-                free(star_mask)
+            star_image = df.generate_star_image(&psf_cython[0],star_mask, oversampling, dim_x, dim_y, psf_dim_x, psf_dim_y)
+            free(star_mask)
+        
         res.set_data(dim_x*oversampling, dim_y*oversampling, <void*>star_image)
         return np.array(res)
 
@@ -526,7 +442,7 @@ cdef class Stars:
             if self.cstars.is_target[i] == 1:
                 return self.cstars.x[i], self.cstars.y[i], self.cstars.signal[i]
 
-    def convert_to_detector(quaternion, fov, platescale):
+    def convert_to_detector(self, quaternion, fov, platescale):
         """Method to determine the x/y coordinates of stars on the detector based on an input quaternion
 
         :param quaternion: Input quaternion, scalar first notation
@@ -539,7 +455,7 @@ cdef class Stars:
         star_quat = np.zeros(4)
         quaternion_inv = np.array([quaternion[0], -quaternion[1], -quaternion[2], -quaternion[3]])
         for i in range(self.cstars.number):
-            stat_quat[0] = 0
+            star_quat[0] = 0
             star_quat[1] = np.cos(self.cstars.dec[i] * (np.pi/180)) * np.cos(self.cstars.ra[i] * (np.pi/180))
             star_quat[2] = np.cos(self.cstars.dec[i] * (np.pi/180)) * np.sin(self.cstars.ra[i] * (np.pi/180))
             star_quat[3] = np.sin(self.cstars.dec[i] * (np.pi/180))
@@ -552,14 +468,25 @@ cdef class Stars:
 
             if np.abs(x_pos) < fov/2 and np.abs(y_pos) < fov/2:
                 self.cstars.x[i] = (x_pos + fov/2) * 3600000 / platescale
-                self.cstars.x[i] = (y_pos + fov/2) * 3600000 / platescale
+                self.cstars.y[i] = (y_pos + fov/2) * 3600000 / platescale
             else:
                 self.cstars.x[i] = -10
                 self.cstars.y[i] = -10
 
+    def get_stars(self):
+        """Getter for stars"""
+        for i in range(self.cstars.number):
+            self._x[i] = float(self.cstars.x[i])
+            self._y[i] = float(self.cstars.y[i])
+            self._ra[i] = float(self.cstars.ra[i])
+            self._dec[i] = float(self.cstars.dec[i])
+            self._signal[i] = float(self.cstars.signal[i])
+            self._is_target[i] = float(self.cstars.is_target[i])
+
+        return self._x, self._y, self._ra, self._dec, self._signal, self._is_target
 
 
-def background_generation(psf, double background_signal, double qe, double exposure_time, unsigned int detector_dim_x, unsigned int detector_dim_y, unsigned int oversampling = 1):
+def gen_bkgr(psf, double background_signal, double qe, double exposure_time, unsigned int detector_dim_x, unsigned int detector_dim_y, unsigned int oversampling = 1):
     """Function that creates a simulated background image based on a random poisson distributed image that is convolved with the given Pointspread function.
 
     :param psf: python array containing the Pointspread function
@@ -626,5 +553,4 @@ def multiply_quat(quat1, quat2):
     return output_quat
 
 
-if __name__ == "__main__":
-    doctest.testmod()
+
