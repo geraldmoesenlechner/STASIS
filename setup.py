@@ -1,29 +1,32 @@
 from os import path
 from setuptools import Extension, setup, find_packages
 from Cython.Build import cythonize
+import Cython
 import numpy as np
 import subprocess as  sp
 
 extensions = [
-    Extension("Utility", ["./STASIS/Utilities/_STASIS_utility.pyx"],
+    Extension("STASIS.Utility", ["./STASIS/Utilities/_STASIS_utility.pyx"],
         include_dirs=[np.get_include()],
-        libraries = ["STASIS_utility"]
+        libraries = ["STASIS_utility"],
+        build_dir = ["."]
         ),
-    Extension("Detector", ["./STASIS/Detector_features/_STASIS_detector.pyx"],
-        extra_compile_args=['-fPIC', '-g', '-lm', '-lfftw3', '-lxml2', '-fopenmp', '-O3', '-lfftw3_omp', '-Wall'],
-        extra_link_args=['-fPIC' ,'-g', '-pthread', '-lfftw3', '-lxml2', '-fopenmp', '-O3', '-lfftw3_omp', '-Wall'],
+    Extension("STASIS.Detector", ["./STASIS/Detector_features/_STASIS_detector.pyx"],
+        extra_compile_args=['-fPIC', '-g', '-lm', '-fopenmp', '-O3', '-Wall'],
+        extra_link_args=['-fPIC' ,'-g', '-pthread', '-fopenmp', '-O3', '-Wall'],
         include_dirs=[np.get_include()],
-        libraries=["STASIS_detector"]
-        )]
-""",
-    Extension("Kinematics", ["./STASIS/Sc_kinematics/_sc_kinematics_py.pyx"],
-        extra_compile_args=['-fPIC', '-g', '-lm', '-Wall'],
-        extra_link_args=['-fPIC' ,'-g', '-Wall'],
-        include_dirs=[np.get_include()],
-        libraries=["sc_kinematics"])"""
-#]
+        libraries=["STASIS_detector"],
+        build_dir=["."]
+        )
+]
 setup(
     name="STASIS",
     ext_modules=cythonize(extensions),
+    cmdclass={'build_ext': Cython.Build.build_ext},
     packages=find_packages(),
+    package_data={
+        "STASIS":["*pxd"],
+        "STASIS/Detector_features":["*.pxd"],
+        "STASIS/Utilities":["*.pxd"]
+    },
 )
