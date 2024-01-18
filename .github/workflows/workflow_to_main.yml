@@ -21,6 +21,7 @@ jobs:
         python -m pip install numpy
         python -m pip install cython
         python -m pip install lxml
+        python -m pip install astropy
         sudo apt install -y libfftw3-dev
         sudo chmod u+x build.sh
         ./build.sh
