@@ -3,7 +3,6 @@
 # STASIS
 
 STASIS is a lightweight, cython based kinematic sky simulator for astronomical detectors. 
-The documentaion can be found at [STASIS.readthedocs.io]()
 
 ## Installation
 
