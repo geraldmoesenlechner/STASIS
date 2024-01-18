@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS += -fPIC -shared -lm -lfftw3 -lxml2 -fopenmp -O3 -lfftw3_omp -lSTASIS_utility -Wall
+CFLAGS += -fPIC -shared -lm -lxml2 -fopenmp -O3 -lSTASIS_utility -Wall
 SRC_DIR = $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 DEST_DIR = /usr/lib/
 INCLUDE_DIR = /usr/include/
