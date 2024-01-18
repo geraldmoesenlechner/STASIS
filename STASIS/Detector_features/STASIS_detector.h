@@ -6,7 +6,6 @@
 #include <string.h>
 #include <complex.h>
 #include <float.h>
-#include <fftw3.h>
 #include <stdbool.h>
 #include "../Utilities/STASIS_utility.h"
 

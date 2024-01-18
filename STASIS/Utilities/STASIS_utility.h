@@ -5,7 +5,6 @@
 #include <time.h>
 #include <string.h>
 #include <complex.h>
-#include <fftw3.h>
 #include <stdbool.h>
 
 #ifndef STASIS_UTILITY_LIB_H
