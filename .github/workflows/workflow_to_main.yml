@@ -20,6 +20,7 @@ jobs:
         python -m pip install pytest coverage
         python -m pip install numpy
         python -m pip install cython
+        sudo apt install -y libfftw3-dev
         sudo chmod u+x build.sh
         ./build.sh
         pip install .
