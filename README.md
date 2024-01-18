@@ -12,6 +12,8 @@ Install from source by
 ```
 git clone https://github.com/geraldmoesenlechner/STASIS.git
 cd STASIS/
+sudo chmod u+x build.sh
+./build.sh
 python -m pip install -e .
 ```
 
