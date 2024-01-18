@@ -28,7 +28,6 @@
 #include <string.h>
 #include <float.h>
 #include <complex.h>
-#include <fftw3.h>
 #include <stdbool.h>
 /*
 #include <libxml/parser.h>
@@ -455,97 +454,6 @@ int extract_image(double *dst, int dw, int dh, double *src, int sw, int sh, int 
 }
 
 
-/**
- * @param data the data matrix to transform
- *
- * @param inv flag for inverse tranformation
- *
- * @param n1 / n2 the fft size
- *
- * @returns 0 on succes, otherwise error
- */
-
-
-static int fft2d_fftw(double complex *array, int inv, int n1, int n2)
-{
-    fftw_plan p;
-    //double complex *tmp;
-
-    fftw_plan_with_nthreads(4);
-    p = fftw_plan_dft_2d(n1, n2, array, array, inv, FFTW_ESTIMATE);
-    fftw_execute(p);
-
-    //memcpy(array, array, n * n * sizeof(double complex));
-
-    fftw_destroy_plan(p);
-    //fftw_free(tmp);
-    return 0;
-}
-
-/*
-double *convolution_new(double *data, double *kernel, int width, int height, int width_kernel, int height_kernel)
-{
-	unsigned int width_pad, height_pad, i;
-	double scale;
-
-	double *data_pad;
-	double *kernel_pad;
-	double complex *data_conv;
-	double complex *kernel_conv;
-	double complex *conv;
-	double complex *tmp;
-  double *result;
-	fftw_plan p_data, p_kernel, p_inv;
-
-
-	width_pad = width + width_kernel - 1;
- 	height_pad = height + height_kernel - 1;
-
-	scale = 1.0/(width_pad*height_pad);
-
-	data_pad = (double*) malloc(sizeof(double) * width_pad * height_pad);
-	kernel_pad = (double*) malloc(sizeof(double) * width_pad * height_pad);
-	data_conv = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * width_pad * height_pad);
-	kernel_conv = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * width_pad * height_pad);
-	conv = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * width_pad * height_pad);
-	tmp = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * width_pad * height_pad);
-	result = (double*) malloc(width * height * sizeof(double));
-
-	bzero(data_pad, width_pad * height_pad * sizeof(double));
-	bzero(kernel_pad, width_pad * height_pad * sizeof(double));
-
-
-	put_matrix(data_pad, width_pad, height_pad, data, width, height, 0, 0);
-
-
-	put_matrix(kernel_pad, width_pad, height_pad, kernel, width_kernel, height_kernel, -width_kernel/2, -height_kernel/2);
-
-	p_data = fftw_plan_dft_r2c_2d(width_pad, height_pad, data_pad, data_conv, FFTW_ESTIMATE);
-	p_kernel = fftw_plan_dft_r2c_2d(width_pad, height_pad, kernel_pad, kernel_conv, FFTW_ESTIMATE);
-	p_inv = fftw_plan_dft_2d(width_pad, height_pad, conv, tmp, 1, FFTW_ESTIMATE);
-	fftw_execute(p_data);
-	fftw_execute(p_kernel);
-
-
-	for (i = 0; i < width_pad * height_pad; i++)
-			conv[i] = data_conv[i] * kernel_conv[i] * scale;
-
-	fftw_execute(p_inv);
-
-	get_matrix(result, width, height, tmp, width_pad, height_pad, width_pad-width, height_pad-height, width, height);
-
-	free(tmp);
-	free(data_conv);
-	free(kernel_conv);
-	free(data_pad);
-	free(kernel_pad);
-	free(conv);
-
-	return result;
-}
-*/
-
-
 double *convolve_sliding_window(double *data, double *kernel, unsigned int width, unsigned int height, unsigned int width_kernel, unsigned int height_kernel)
 {
 	unsigned int i,j, k, l, i_start, j_start, width_pad, height_pad;
@@ -601,107 +509,7 @@ double *convolve_sliding_window(double *data, double *kernel, unsigned int width
 	return result;
 }
 
-/**
- * @brief convolution of to imanges
- *
- * @param data first input image
- * @param kernel second image (in the general case the Psf)
- * @param width size of the first image in x direction
- * @param height size of the first image in y direction
- * @param width_kernel size of the second image in x direction
- * @param height_kernel size of the second image in y direction
- *
- * @returns the convolved image
- *
- */
 
-double *convolve(double *data, double *kernel, int width, int height, int width_kernel, int height_kernel)
-{
-    int i, n;
-
-    double *tmp;
-    double *result;
-
-    double complex *data_pad;
-    double complex *kernel_pad;
-
-
-    double complex *conv;
-
-    double scale;
-
-    /* determine fft size */
-    if (width < height)
-        n = get_next_pow_2_bound(height);
-    else
-        n = get_next_pow_2_bound(width);
-
-		scale = 1.0/(n*n);
-    /* allocate data, kernel and result */
-
-    tmp = malloc(width * height * sizeof(double));
-    result = malloc(width * height * sizeof(double));
-
-    /* allocate padded data and convolution arrays */
-
-    data_pad = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * n * n);
-
-
-
-    //kernel_pad = malloc(n * n * sizeof(double complex));
-    kernel_pad = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * n * n);
-
-    //conv = malloc(n * n * sizeof(double complex));
-    conv = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * n * n);
-
-    /* set zero */
-    bzero(data_pad, n * n * sizeof(double complex));
-    bzero(kernel_pad, n * n * sizeof(double complex));
-
-    /* put kernel and shift center to upper left corner */
-    put_matrix(data_pad, n, n, data, width, height, 0, 0);
-
-
-    /* put kernel and shift center to upper left corner */
-    put_matrix(kernel_pad, n, n, kernel, width_kernel, height_kernel, -width_kernel/2, -height_kernel/2);
-
-    bzero(data, width * height * sizeof(double));
-    bzero(kernel, width_kernel * height_kernel * sizeof(double));
-
-
-
-    /* transform both forward */
-    fft2d_fftw(data_pad, 0, n, n);
-
-    fft2d_fftw(kernel_pad, 0, n, n);
-
-
-		//fft2d_fftw_real(data_pad, kernel_pad, n, n);
-
-    /* multiplication step */
-    for (i = 0; i < n * n; i++)
-        conv[i] = data_pad[i] * kernel_pad[i] * scale;
-
-    /* transform result backwards */
-    fft2d_fftw(conv, 1, n, n);
-
-
-    get_matrix(tmp, width, height,
-               conv, n, n,
-               n-width, n-height, width, height);
-
-    memcpy(result, tmp, width * height * sizeof(double));
-
-    free(tmp);
-    //free(data);
-    //free(kernel);
-    free(data_pad);
-    free(kernel_pad);
-
-    free(conv);
-
-    return result;
-}
 
 /*
 void read_stars_config(char *inputfile)

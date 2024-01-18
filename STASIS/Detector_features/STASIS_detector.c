@@ -28,7 +28,6 @@
 #include <string.h>
 #include <float.h>
 #include <complex.h>
-#include <fftw3.h>
 #include <stdbool.h>
 #include "./STASIS_detector.h"
 
