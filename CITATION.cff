@@ -1,0 +1,7 @@
+@software{STASIS_Data_Simulator,
+  author = {Mösenlechner, Gerald},
+  title = {STASIS Astrophysical Image Simulator}},
+  url = {https://github.com/geraldmoesenlechner/STASIS},
+  version = {1.0.0},
+  year = {2024}
+}
