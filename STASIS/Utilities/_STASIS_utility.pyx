@@ -3,16 +3,6 @@ file    _STASIS_utility_py.pyx
 author  Gerald Mösenlechner (gerald.moesenlechner@univie.ac.at)
 date    November, 2021
 
-Copyright
----------
-This program is free software; you can redistribute it and/or modify it
-under the terms and conditions of the GNU General Public License,
-version 2, as published by the Free Software Foundation.
-
-This program is distributed in the hope it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-
 Brief
 -----
 Library containing utility functions and the wrappers for the datasim_utilities C-library
